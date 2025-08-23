@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: settlement-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finledger
+    username: finledger
+    password: finledger
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
