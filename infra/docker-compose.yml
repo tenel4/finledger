@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - finledger_pgdata:/var/lib/postgresql/data
+      - finledger_volume:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -23,4 +23,4 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
 
 volumes:
-  finledger_pgdata:
+  finledger_volume:

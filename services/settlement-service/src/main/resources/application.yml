@@ -7,6 +7,7 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -21,6 +22,12 @@ spring:
     username: guest
     password: guest
 
+rabbitmq:
+  queue:
+    trade-created: trade.created.queue
+  exchange:
+    trade-exchange: trade.created.exchange
+
 management:
   endpoints:
     web:
@@ -28,6 +35,5 @@ management:
         include: health,info,metrics
 
 logging:
-  level:
-    org.springframework: INFO
-    com.finledger: DEBUG
+  pattern:
+    level: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId} %-5level %logger{36} - %msg%n"

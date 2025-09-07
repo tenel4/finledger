@@ -13,12 +13,10 @@ import java.util.UUID;
 @Component
 @Order(1)
 public class CorrelationIdFilter implements Filter {
-
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String correlationId = Optional.ofNullable(httpRequest.getHeader(CORRELATION_ID_HEADER))
                 .orElse(UUID.randomUUID().toString());
