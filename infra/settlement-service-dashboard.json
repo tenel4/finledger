@@ -1,0 +1,137 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "Prometheus datasource",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    },
+    {
+      "name": "DS_TEMPO",
+      "label": "Tempo",
+      "description": "Tempo datasource",
+      "type": "datasource",
+      "pluginId": "tempo",
+      "pluginName": "Tempo"
+    }
+  ],
+  "title": "Settlement Service Observability",
+  "tags": ["spring-boot", "micrometer", "prometheus", "tempo"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Settlements Created",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "settlements_created_total",
+          "legendFormat": "Total Settlements",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "HTTP Request Duration (95th percentile)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95 latency",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        { "format": "s", "label": "seconds" },
+        { "format": "short" }
+      ],
+      "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "HTTP Request Rate",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (uri)",
+          "legendFormat": "{{uri}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        { "format": "reqps", "label": "req/s" },
+        { "format": "short" }
+      ],
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "JVM Memory Usage",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{area=\"heap\"}",
+          "legendFormat": "Heap Used",
+          "refId": "A"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{area=\"heap\"}",
+          "legendFormat": "Heap Max",
+          "refId": "B"
+        }
+      ],
+      "yaxes": [
+        { "format": "bytes" },
+        { "format": "short" }
+      ],
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "RabbitMQ Messages Published",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "sum(rate(rabbitmq_channel_messages_published_total[1m]))",
+          "legendFormat": "Messages Published",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        { "format": "ops" },
+        { "format": "short" }
+      ],
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Active Traces (Tempo)",
+      "datasource": "${DS_TEMPO}",
+      "targets": [
+        {
+          "expr": "",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": "${DS_PROMETHEUS}",
+        "query": "label_values(application)",
+        "refresh": 1
+      }
+    ]
+  }
+}

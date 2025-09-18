@@ -1,7 +1,13 @@
 server:
   port: 8080
 
+app:
+  timezone: Europe/London
+
 spring:
+  application:
+    name: settlement-service
+
   datasource:
     url: jdbc:postgresql://localhost:5432/finledger
     username: postgres
@@ -14,26 +20,75 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
+      hibernate.default_schema: settlement
+
   flyway:
     enabled: true
+    schemas: settlement
+    default-schema: settlement
+
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
 
-rabbitmq:
-  queue:
-    trade-created: trade.created.queue
-  exchange:
-    trade-exchange: trade.created.exchange
+messaging:
+  trade:
+    declare: true
+    exchange: trade.exchange
+    routingKey: trade.created
+    queue: trade.created.queue
+    retryExchange: trade.retry.exchange
+    retryQueue: trade.created.retry
+    retryRoutingKey: trade.retry
+    dlq: trade.created.dlq
+    eventTypeHeader: trade.created
+
+  settlement:
+    declareExchange: true
+    exchange: settlement.exchange
+    routingKey: settlement.created
+    eventTypeHeader: settlement.created
+
+outbox:
+  flush:
+    enabled: true
+    fixedDelayMs: 30000
+    batchSize: 100                # number of rows per poll
+    maxBatchesPerRun: 100          # prevent unbounded loops per tick
+    maxRetries: 8                 # after this, send to dead_outbox_event
+    backoff:
+      initialMs: 1000
+      multiplier: 2.0
+      maxMs: 60000
+
+finledger:
+  reports:
+    base-dir: /var/finledger/reports
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: settlement-service
+  tracing:
+    sampling:
+      probability: 1.0
+    baggage:
+      remote-fields: X-Correlation-Id
+      correlation:
+        fields: X-Correlation-Id
+  otlp:
+    tracing:
+      endpoint: http://otel-collector:4318/v1/traces
 
 logging:
-  pattern:
-    level: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId} %-5level %logger{36} - %msg%n"
+  level:
+    io.micrometer.tracing: INFO
+    org.springframework.web: INFO
+  pattern: # unnecessary except for local debugging
+    level: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger{36} - %msg%n"
