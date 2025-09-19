@@ -9,7 +9,7 @@ import java.util.UUID;
 public record GetSettlementsResponse(
         UUID id,
         UUID tradeId,
-        LocalDate value,
+        LocalDate valueDate,
         BigDecimal grossAmount,
         BigDecimal fees,
         BigDecimal netAmount,

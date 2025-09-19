@@ -10,9 +10,9 @@ public interface LedgerEntryJpaRepository extends JpaRepository<LedgerEntryEntit
 
     @Query("""
         SELECT e FROM LedgerEntryEntity e
-        WHERE (:accountId IS NULL OR e.accountId = :accountId)
-          AND (:from IS NULL OR e.entryTime >= :from)
-          AND (:to IS NULL OR e.entryTime < :to)
+        WHERE (e.accountId = :accountId)
+          AND (e.entryTime >= :from)
+          AND (e.entryTime < :to)
         ORDER BY e.entryTime ASC
     """)
     List<LedgerEntryEntity> search(UUID accountId, Instant from, Instant to);

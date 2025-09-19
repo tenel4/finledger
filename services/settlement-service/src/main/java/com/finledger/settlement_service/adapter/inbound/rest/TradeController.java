@@ -62,12 +62,12 @@ public class TradeController {
             @RequestParam String symbol,
             @RequestParam LocalDate from,
             @RequestParam LocalDate to,
-            @RequestParam Trade.Side side
+            @RequestParam Trade.Side side // TODO decouple domain enum and rest
     ) {
         var fromI = DateConversionUtil.startOfDay(from, defaultZoneId);
         var toI = DateConversionUtil.startOfNextDay(to, defaultZoneId);
 
-        List<Trade> trades = getTrades.execute(symbol, fromI, toI, side);
+        List<Trade> trades = getTrades.execute(symbol, fromI, toI, side); // TODO decouple domain model and rest
         var result = trades.stream()
                 .map(TradeMapper::toResponse)
                 .toList();
@@ -79,7 +79,7 @@ public class TradeController {
             @RequestParam Settlement.Status status, // TODO decouple domain enum and rest
             @RequestParam LocalDate date
     ) {
-        List<Settlement> settlements = getSettlements.execute(status, date);
+        List<Settlement> settlements = getSettlements.execute(status, date); // TODO decouple domain model and rest
         var result = settlements.stream()
                 .map(SettlementMapper::toResponse)
                 .toList();

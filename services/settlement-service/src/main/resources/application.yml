@@ -17,7 +17,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate.format_sql: true
       hibernate.default_schema: settlement
@@ -54,7 +54,7 @@ messaging:
 outbox:
   flush:
     enabled: true
-    fixedDelayMs: 30000
+    fixedDelayMs: 1000
     batchSize: 100                # number of rows per poll
     maxBatchesPerRun: 100          # prevent unbounded loops per tick
     maxRetries: 8                 # after this, send to dead_outbox_event
