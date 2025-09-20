@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface GetLedgerSummaryUseCase {
-    List<Result> execute(Instant date);
+  List<Result> execute(Instant date);
 
-    record Result(UUID accountId, String currency, java.math.BigDecimal sum) {}
+  record Result(UUID accountId, String currency, java.math.BigDecimal sum) {}
 }

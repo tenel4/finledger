@@ -5,13 +5,12 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record SettlementCreatedEvent(
-        UUID messageId,
-        UUID settlementId,
-        LocalDate valueDate,
-        BigDecimal grossAmount,
-        BigDecimal fees,
-        BigDecimal netAmount,
-        String currency,
-        UUID buyerAccountId,
-        UUID sellerAccountId
-) {}
+    UUID messageId,
+    UUID settlementId,
+    LocalDate valueDate,
+    BigDecimal grossAmount,
+    BigDecimal fees,
+    BigDecimal netAmount,
+    String currency,
+    UUID buyerAccountId,
+    UUID sellerAccountId) {}

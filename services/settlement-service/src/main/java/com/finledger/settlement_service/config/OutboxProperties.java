@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 @Setter
 public class OutboxProperties {
 
-    private boolean enabled = true;
-    private int batchSize = 100;
-    private int maxBatchesPerRun = 100;
-    private int maxRetries = 8;
+  private boolean enabled = true;
+  private int batchSize = 100;
+  private int maxBatchesPerRun = 100;
+  private int maxRetries = 8;
 
-    private long backoffInitialMs = 1000;
-    private double backoffMultiplier = 2.0;
-    private long backoffMaxMs = 60000;
+  private long backoffInitialMs = 1000;
+  private double backoffMultiplier = 2.0;
+  private long backoffMaxMs = 60000;
 }

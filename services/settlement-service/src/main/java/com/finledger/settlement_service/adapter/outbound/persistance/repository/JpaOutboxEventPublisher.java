@@ -15,59 +15,73 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JpaOutboxEventPublisher implements EventPublisher {
-    private static final Logger log = LoggerFactory.getLogger(JpaOutboxEventPublisher.class);
+  private static final Logger log = LoggerFactory.getLogger(JpaOutboxEventPublisher.class);
 
-    private final OutboxEventJpaRepository repo;
-    private final ObjectMapper mapper;
+  private final OutboxEventJpaRepository repo;
+  private final ObjectMapper mapper;
 
-    public JpaOutboxEventPublisher(OutboxEventJpaRepository repo, ObjectMapper mapper) {
-        this.repo = repo;
-        this.mapper = mapper;
+  public JpaOutboxEventPublisher(OutboxEventJpaRepository repo, ObjectMapper mapper) {
+    this.repo = repo;
+    this.mapper = mapper;
+  }
+
+  @Override
+  @Transactional
+  public void publish(DomainEvent event) {
+    String correlationId = MDC.get("correlationId");
+    String traceId = MDC.get("traceId");
+
+    try {
+      String payload = mapper.writeValueAsString(event);
+
+      String aggregateType = null;
+      String aggregateId = null;
+
+      if (event instanceof AggregateDomainEvent agg) {
+        aggregateType = agg.aggregateType();
+        aggregateId = agg.aggregateId().toString();
+      }
+
+      OutboxEventEntity entity =
+          OutboxEventEntity.pending(
+              event.eventId(), event.eventType(), aggregateType, aggregateId, payload);
+
+      repo.save(entity);
+
+      if (log.isInfoEnabled()) {
+        log.info(
+            "Outbox event persisted successfully: eventId={} eventType={} aggregateType={} aggregateId={} correlationId={} traceId={}",
+            event.eventId(),
+            event.eventType(),
+            aggregateType,
+            aggregateId,
+            correlationId,
+            traceId);
+      }
+      if (log.isDebugEnabled()) {
+        log.debug("Outbox event payload: {}", payload);
+      }
+
+    } catch (JsonProcessingException e) {
+      log.error(
+          "Failed to serialize domain event: eventType={} eventId={} correlationId={} traceId={}",
+          event.eventType(),
+          event.eventId(),
+          correlationId,
+          traceId,
+          e);
+      throw new EventPersistenceException(
+          "Failed to serialize domain event: " + event.eventType(), e);
+    } catch (RuntimeException e) {
+      log.error(
+          "Failed to persist domain event: eventType={} eventId={} correlationId={} traceId={}",
+          event.eventType(),
+          event.eventId(),
+          correlationId,
+          traceId,
+          e);
+      throw new EventPersistenceException(
+          "Failed to persist domain event: " + event.eventType(), e);
     }
-
-    @Override
-    @Transactional
-    public void publish(DomainEvent event) {
-        String correlationId = MDC.get("correlationId");
-        String traceId = MDC.get("traceId");
-
-        try {
-            String payload = mapper.writeValueAsString(event);
-
-            String aggregateType = null;
-            String aggregateId = null;
-
-            if (event instanceof AggregateDomainEvent agg) {
-                aggregateType = agg.aggregateType();
-                aggregateId = agg.aggregateId().toString();
-            }
-
-            OutboxEventEntity entity = OutboxEventEntity.pending(
-                    event.eventId(),
-                    event.eventType(),
-                    aggregateType,
-                    aggregateId,
-                    payload
-            );
-
-            repo.save(entity);
-
-            if (log.isInfoEnabled()) {
-                log.info("Outbox event persisted successfully: eventId={} eventType={} aggregateType={} aggregateId={} correlationId={} traceId={}",
-                        event.eventId(), event.eventType(), aggregateType, aggregateId, correlationId, traceId);
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Outbox event payload: {}", payload);
-            }
-
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize domain event: eventType={} eventId={} correlationId={} traceId={}",
-                    event.eventType(), event.eventId(), correlationId, traceId, e);
-            throw new EventPersistenceException("Failed to serialize domain event: " + event.eventType(), e);
-        } catch (RuntimeException e) {
-            log.error("Failed to persist domain event: eventType={} eventId={} correlationId={} traceId={}",
-                    event.eventType(), event.eventId(), correlationId, traceId, e);
-            throw new EventPersistenceException("Failed to persist domain event: " + event.eventType(), e);
-        }
-    }
+  }
 }

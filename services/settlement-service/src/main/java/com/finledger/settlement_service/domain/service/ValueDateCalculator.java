@@ -4,5 +4,5 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 public interface ValueDateCalculator {
-    LocalDate calculate(Instant tradeTime);
+  LocalDate calculate(Instant tradeTime);
 }

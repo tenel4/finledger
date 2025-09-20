@@ -5,7 +5,9 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public interface LedgerSummaryView {
-    UUID getAccountId();
-    String getCurrency();
-    BigDecimal getSum();
+  UUID getAccountId();
+
+  String getCurrency();
+
+  BigDecimal getSum();
 }

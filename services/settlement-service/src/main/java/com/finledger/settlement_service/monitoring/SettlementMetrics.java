@@ -7,16 +7,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class SettlementMetrics {
 
-    private final Counter settlementsCreated;
+  private final Counter settlementsCreated;
 
-    public SettlementMetrics(MeterRegistry registry) {
-        this.settlementsCreated = Counter.builder("settlements.created.total")
-                .description("Number of settlements created")
-                .tag("service", "settlement-service")
-                .register(registry);
-    }
+  public SettlementMetrics(MeterRegistry registry) {
+    this.settlementsCreated =
+        Counter.builder("settlements.created.total")
+            .description("Number of settlements created")
+            .tag("service", "settlement-service")
+            .register(registry);
+  }
 
-    public void increment() {
-        settlementsCreated.increment();
-    }
+  public void increment() {
+    settlementsCreated.increment();
+  }
 }
