@@ -53,7 +53,7 @@ sequenceDiagram
 ## Quick Start
 
 ### Requirements
-- JDK 17+
+- JDK 21+
 - Docker + Docker Compose
 - Maven
 

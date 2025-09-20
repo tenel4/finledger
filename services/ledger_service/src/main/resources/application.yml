@@ -1,0 +1,47 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ledger_service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finledger
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      hibernate.default_schema: ledger
+  flyway:
+    enabled: true
+    schemas: ledger
+    default-schema: ledger
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+messaging:
+  settlement:
+    exchange: settlement.exchange
+    queue: settlement.created.queue
+    retryQueue: settlement.created.retry
+    dlq: settlement.created.dlq
+    routingKey: settlement.created
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  pattern:
+    level: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId} %-5level %logger{36} - %msg%n"
