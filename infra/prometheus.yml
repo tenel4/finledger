@@ -5,4 +5,9 @@ scrape_configs:
   - job_name: "settlement-service"
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["host.docker.internal:8080"]  # if running app locally
+      - targets: ["host.docker.internal:8080"]
+
+  - job_name: "rabbitmq"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["rabbitmq:15692"]

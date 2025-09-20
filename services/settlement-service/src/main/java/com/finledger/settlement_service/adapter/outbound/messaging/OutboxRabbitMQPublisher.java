@@ -51,7 +51,6 @@ public class OutboxRabbitMQPublisher {
         this.props = props;
         this.metrics = metrics;
 
-        // Register gauges with enum-safe calls
         metrics.gauge("outbox.backlog.total", this,
                 p -> p.outboxRepo.countByStatuses(List.of(OutboxStatus.PENDING, OutboxStatus.RETRY)));
         metrics.gauge("outbox.backlog.pending", this,
@@ -62,12 +61,10 @@ public class OutboxRabbitMQPublisher {
                 p -> p.outboxRepo.countByStatus(OutboxStatus.DEAD));
     }
 
-    @Scheduled(fixedDelayString = "${outbox.flush.fixedDelayMs:30000}")
+    @Scheduled(fixedDelayString = "${outbox.flush.fixedDelayMs:1000}")
     public void scheduledFlush() {
         if (!props.isEnabled()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Outbox flush skipped because it is disabled");
-            }
+            log.debug("Outbox flush skipped because it is disabled");
             return;
         }
 
@@ -80,10 +77,9 @@ public class OutboxRabbitMQPublisher {
         int totalDead = 0;
         long start = System.currentTimeMillis();
 
-        if (log.isInfoEnabled()) {
-            log.info("Starting outbox flush: maxBatches={} batchSize={} correlationId={} traceId={}",
-                    props.getMaxBatchesPerRun(), props.getBatchSize(), correlationId, traceId);
-        }
+
+        log.info("Starting outbox flush: maxBatches={} batchSize={} correlationId={} traceId={}",
+                props.getMaxBatchesPerRun(), props.getBatchSize(), correlationId, traceId);
 
         while (batches < props.getMaxBatchesPerRun()) {
             List<OutboxEventEntity> batch = lockDueBatch();
@@ -102,11 +98,9 @@ public class OutboxRabbitMQPublisher {
         metrics.timer("outbox.flush.duration")
                 .record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
-        if (log.isInfoEnabled()) {
-            log.info("Completed outbox flush: batches={} sent={} retries={} dead={} durationMs={} correlationId={} traceId={}",
-                    batches, totalProcessed, totalRetries, totalDead,
-                    (System.currentTimeMillis() - start), correlationId, traceId);
-        }
+        log.info("Completed outbox flush: batches={} sent={} retries={} dead={} durationMs={} correlationId={} traceId={}",
+                batches, totalProcessed, totalRetries, totalDead,
+                (System.currentTimeMillis() - start), correlationId, traceId);
     }
 
     @Transactional
@@ -144,10 +138,8 @@ public class OutboxRabbitMQPublisher {
                 metrics.counter("outbox.sent", METRICS_TAG_EXCHANGE, binding.getExchange(), "rk", binding.getRoutingKey()).increment();
                 success++;
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Outbox event sent: id={} type={} exchange={} rk={} correlationId={} traceId={}",
-                            e.getId(), e.getType(), binding.getExchange(), binding.getRoutingKey(), correlationId, traceId);
-                }
+                log.debug("Outbox event sent: id={} type={} exchange={} rk={} correlationId={} traceId={}",
+                        e.getId(), e.getType(), binding.getExchange(), binding.getRoutingKey(), correlationId, traceId);
 
             } catch (Exception ex) {
                 String err = truncate(ex.getMessage(), 1900);

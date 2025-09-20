@@ -1,6 +1,7 @@
-package com.finledger.ledger_service.adapter.outbound.persistence;
+package com.finledger.settlement_service.adapter.outbound.persistance.repository;
 
-import com.finledger.ledger_service.application.port.outbound.ProcessedMessageRepositoryPort;
+import com.finledger.settlement_service.adapter.outbound.persistance.entity.ProcessedMessageEntity;
+import com.finledger.settlement_service.application.port.outbound.ProcessedMessageRepositoryPort;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;

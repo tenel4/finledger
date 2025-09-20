@@ -6,6 +6,7 @@ import com.finledger.ledger_service.application.port.outbound.ProcessedMessageRe
 import com.finledger.ledger_service.domain.model.LedgerEntry;
 import com.finledger.ledger_service.domain.model.LedgerEntryReferenceType;
 import com.finledger.ledger_service.domain.value.SignedMoney;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public class OnSettlementCreatedUseCaseImpl implements OnSettlementCreatedUseCas
     }
 
     @Override
+    @Transactional
     public void execute(UUID messageKey, UUID settlementId, UUID buyerAccountId, UUID sellerAccountId,
                         BigDecimal netAmount, String currency) {
         if (!processedMessageRepository.markProcessedIfNew(messageKey)) return;

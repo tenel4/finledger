@@ -31,7 +31,7 @@ CREATE TABLE settlement (
 -- Processed message table
 CREATE TABLE processed_message (
     message_key UUID PRIMARY KEY,
-    processed_at TIMESTAMP NOT NULL DEFAULT NOW()
+    processed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 --Outbox Event table

@@ -28,6 +28,7 @@ class OnTradeCreatedUseCaseImplTest {
 
     private TradeRepositoryPort tradeRepositoryPort;
     private SettlementRepositoryPort settlementRepositoryPort;
+    private ProcessedMessageRepositoryPort processedMessageRepository;
     private ValueDateCalculator valueDateCalculator;
     private EventPublisher eventPublisher;
 
@@ -44,12 +45,14 @@ class OnTradeCreatedUseCaseImplTest {
     void setUp() {
         tradeRepositoryPort = mock(TradeRepositoryPort.class);
         settlementRepositoryPort = mock(SettlementRepositoryPort.class);
+        processedMessageRepository = mock(ProcessedMessageRepositoryPort.class);
         valueDateCalculator = mock(ValueDateCalculator.class);
         eventPublisher = mock(EventPublisher.class);
 
         useCase = new OnTradeCreatedUseCaseImpl(
                 tradeRepositoryPort,
                 settlementRepositoryPort,
+                processedMessageRepository,
                 valueDateCalculator,
                 eventPublisher
         );
@@ -86,6 +89,7 @@ class OnTradeCreatedUseCaseImplTest {
         Trade trade = sampleTrade();
         LocalDate valueDate = LocalDate.of(2025, 1, 3);
 
+        when(processedMessageRepository.markProcessedIfNew(eventId)).thenReturn(true);
         when(tradeRepositoryPort.findById(tradeId)).thenReturn(Optional.of(trade));
         when(valueDateCalculator.calculate(tradeTime)).thenReturn(valueDate);
 
@@ -105,8 +109,20 @@ class OnTradeCreatedUseCaseImplTest {
     }
 
     @Test
+    void execute_shouldSkipWhenEventAlreadyProcessed() {
+        TradeCreatedEventDto event = sampleEvent();
+
+        when(processedMessageRepository.markProcessedIfNew(eventId)).thenReturn(false);
+
+        useCase.execute(event);
+
+        verifyNoInteractions(tradeRepositoryPort, settlementRepositoryPort, valueDateCalculator, eventPublisher);
+    }
+
+    @Test
     void execute_shouldThrowWhenTradeNotFound() {
         TradeCreatedEventDto event = sampleEvent();
+        when(processedMessageRepository.markProcessedIfNew(eventId)).thenReturn(true);
         when(tradeRepositoryPort.findById(tradeId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.execute(event))
@@ -122,9 +138,10 @@ class OnTradeCreatedUseCaseImplTest {
         Trade trade = sampleTrade();
         LocalDate valueDate = LocalDate.of(2025, 1, 3);
 
+        when(processedMessageRepository.markProcessedIfNew(eventId)).thenReturn(true);
         when(tradeRepositoryPort.findById(tradeId)).thenReturn(Optional.of(trade));
         when(valueDateCalculator.calculate(tradeTime)).thenReturn(valueDate);
-        doThrow(new RuntimeException("Kafka down")).when(eventPublisher).publish(any());
+        doThrow(new RuntimeException("RabbitMQ down")).when(eventPublisher).publish(any());
 
         assertThatThrownBy(() -> useCase.execute(event))
                 .isInstanceOf(SettlementCreationException.class)

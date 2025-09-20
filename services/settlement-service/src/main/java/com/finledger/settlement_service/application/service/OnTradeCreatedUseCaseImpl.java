@@ -3,6 +3,7 @@ package com.finledger.settlement_service.application.service;
 import com.finledger.settlement_service.application.dto.SettlementCreatedEventDto;
 import com.finledger.settlement_service.application.dto.TradeCreatedEventDto;
 import com.finledger.settlement_service.application.port.outbound.EventPublisher;
+import com.finledger.settlement_service.application.port.outbound.ProcessedMessageRepositoryPort;
 import com.finledger.settlement_service.application.port.outbound.TradeRepositoryPort;
 import com.finledger.settlement_service.application.port.inbound.OnTradeCreatedUseCase;
 import com.finledger.settlement_service.domain.event.SettlementCreatedEvent;
@@ -12,6 +13,8 @@ import com.finledger.settlement_service.application.port.outbound.SettlementRepo
 import com.finledger.settlement_service.domain.service.ValueDateCalculator;
 import com.finledger.settlement_service.domain.value.Money;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,17 +23,22 @@ import java.util.Optional;
 
 @Service
 public class OnTradeCreatedUseCaseImpl implements OnTradeCreatedUseCase {
+    private static final Logger log = LoggerFactory.getLogger(OnTradeCreatedUseCaseImpl.class);
+
     private final TradeRepositoryPort tradeRepositoryPort;
     private final SettlementRepositoryPort settlementRepositoryPort;
+    private final ProcessedMessageRepositoryPort processedMessageRepository;
     private final ValueDateCalculator valueDateCalculator;
     private final EventPublisher eventPublisher;
 
     public OnTradeCreatedUseCaseImpl(TradeRepositoryPort tradeRepositoryPort,
                                      SettlementRepositoryPort settlementRepositoryPort,
+                                     ProcessedMessageRepositoryPort processedMessageRepository,
                                      ValueDateCalculator valueDateCalculator,
                                      EventPublisher eventPublisher) {
         this.tradeRepositoryPort = tradeRepositoryPort;
         this.settlementRepositoryPort = settlementRepositoryPort;
+        this.processedMessageRepository = processedMessageRepository;
         this.valueDateCalculator = valueDateCalculator;
         this.eventPublisher = eventPublisher;
     }
@@ -38,6 +46,11 @@ public class OnTradeCreatedUseCaseImpl implements OnTradeCreatedUseCase {
     @Override
     @Transactional
     public void execute(TradeCreatedEventDto event) {
+        if (!processedMessageRepository.markProcessedIfNew(event.eventId())) {
+            log.info("Skipping already processed event {}", event.eventId());
+            return;
+        }
+
         Optional<Trade> tradeOpt = tradeRepositoryPort.findById(event.tradeId());
         if (tradeOpt.isEmpty()) {
             throw new IllegalStateException("Trade not found for id: " + event.tradeId());
