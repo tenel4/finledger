@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.finledger</groupId>
-	<artifactId>ledger_service</artifactId>
+	<artifactId>ledger-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ledger_service</name>
 	<description>Ledger Service for FinLedger</description>
