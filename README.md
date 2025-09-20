@@ -1,6 +1,6 @@
 # FinLedger — Event-Driven Trade Settlement & Ledger System
 [![CI Build](https://github.com/tenel4/finLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/tenel4/finLedger/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/tenel4/finLedger/branch/main/graph/badge.svg)](https://codecov.io/gh/tenel4/finLedger)
+[![codecov](https://codecov.io/gh/tenel4/finLedger/branch/master/graph/badge.svg)](https://codecov.io/gh/tenel4/finLedger)
 ![Java](https://img.shields.io/badge/Java-21-blue.svg)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)
