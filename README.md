@@ -19,7 +19,7 @@ The system demonstrates:
 - Idempotency and DLQ handling
 - Metrics & observability (Spring Boot Actuator + Prometheus, Grafana dashboards)
 - Distributed tracing with OpenTelemetry + Tempo
-- Integration testing with Testcontainers (skipped in this repo for now)
+- Integration testing with Testcontainers
 ---
 
 ## Architecture
